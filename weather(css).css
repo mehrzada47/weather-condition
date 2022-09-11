@@ -1,0 +1,13 @@
+#all,.today>.card {
+    background-color: #013b45;
+    color: #c4dfe6;
+}
+
+.row > div > .card{
+    background-color: #013b45;
+    color: #c4dfe6;
+}
+.navbar,.navbar>div>a{
+    background-color:#013b45 ;
+    color: #c4dfe6;
+}
