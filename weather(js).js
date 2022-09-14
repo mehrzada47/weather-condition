@@ -1,28 +1,7 @@
-function miladi_be_shamsi(gy, gm, gd) {
-    var g_d_m, jy, jm, jd, gy2, days;
-    g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-    gy2 = (gm > 2) ? (gy + 1) : gy;
-    days = 355666 + (365 * gy) + ~~((gy2 + 3) / 4) - ~~((gy2 + 99) / 100) + ~~((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
-    jy = -1595 + (33 * ~~(days / 12053));
-    days %= 12053;
-    jy += 4 * ~~(days / 1461);
-    days %= 1461;
-    if (days > 365) {
-        jy += ~~((days - 1) / 365);
-        days = (days - 1) % 365;
-    }
-    if (days < 186) {
-        jm = 1 + ~~(days / 31);
-        jd = 1 + (days % 31);
-    } else {
-        jm = 7 + ~~((days - 186) / 30);
-        jd = 1 + ((days - 186) % 30);
-    }
-    return [jy + '/' + jm + '/' + jd];
-}
 
-function weekdays(date,index) {
-    let temp = (date.getDay()+index)%7;
+//get week days function
+function weekdays(date, index) {
+    let temp = (date.getDay() + index) % 7;
     if (temp == 0) {
         return ["sunday"]
     } else if (temp == 1) {
@@ -39,13 +18,61 @@ function weekdays(date,index) {
         return ["saturday"]
     }
 }
-let temp_date=new Date();
-let days=document.querySelectorAll(".card-title");
-days.forEach((day,index)=>{
-    day.classList.add("text-center");
-    if (index==0){
-        day.textContent=`today's weather`;
+
+//set card's week days
+let temp_date = new Date();
+
+
+//add search activity & call set data function
+let search_area = document.querySelector("#search-box");
+let search_button = document.querySelector("#btn-search");
+
+search_area.addEventListener("submit", e => {
+    e.preventDefault();
+    if (search_area.area.value) {
+        set_data(search_area.area.value)
     }
-    else{
-    day.textContent=`${weekdays(temp_date,index)}`;}
 })
+search_button.addEventListener("click", e => {
+    e.preventDefault();
+    if (search_area.area.value) {
+        set_data(search_area.area.value)
+    }
+})
+// set data function
+async function set_data(city) {
+    let data = await fetch(`https://one-api.ir/weather/?token=875466:631fa485f0ca93.08765454&action=daily&city=${city}`);
+    let days = await data.json();
+    //get card
+    let cards = document.querySelectorAll(".card");
+    //get & set  city place
+    let city_content=document.querySelector("#city");
+    city_content.textContent=city;
+ // set data with foreach function
+    cards.forEach((card, index) => {
+       // today weather
+        if (index == 0) {
+            card.innerHTML = ` \n <img src="https://one-api.ir/weather/?token=875466:631fa485f0ca93.08765454&action=icon&id=${days.result.list[index].weather[0].icon}" class="card-img-top" alt="">
+            <div class="card-body">
+                <h5 class="card-title text-center">today's weather</h5>
+                <h5 class="card-title text-center">${days.result.list[index].weather[0].description}</h5>
+                <p class="btn btn-primary ">${days.result.list[index].temp.min}</p>
+                <p class="btn btn-success">${days.result.list[index].temp.day}</p>
+                <p class="btn btn-danger">${days.result.list[index].temp.max}</p>`;
+        } else {
+            // console.log(index);
+            console.log(days.result.list[index].weather.icon);
+            card.innerHTML = `\n <img src="https://one-api.ir/weather/?token=875466:631fa485f0ca93.08765454&action=icon&id=${days.result.list[index].weather[0].icon}" class="card-img-top" alt="">
+            <div class="card-body">
+                <h5 class="card-title text-center">${weekdays(temp_date, index)}</h5>
+                <h5 class="card-title text-center">${days.result.list[index].weather[0].description}</h5>
+                <p class="btn btn-primary ">${days.result.list[index].temp.min}</p>
+                <p class="btn btn-success">${days.result.list[index].temp.day}</p>
+                <p class="btn btn-danger">${days.result.list[index].temp.max}</p>`;
+        }
+
+    })
+}
+// default city
+set_data("کلاچای")
+
